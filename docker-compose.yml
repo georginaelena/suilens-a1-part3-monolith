@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: suilens
+      POSTGRES_PASSWORD: suilens
+      POSTGRES_DB: suilens
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U suilens"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+ 
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://suilens:suilens@db:5432/suilens
+    depends_on:
+      db:
+        condition: service_healthy
+ 
+volumes:
+  pgdata:
